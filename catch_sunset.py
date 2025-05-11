@@ -9,27 +9,28 @@
 # that app will notify someone else
 
 import datetime
-from astral.sun import sun, SunDirection, golden_hour
-from astral.geocoder import database, lookup
+# from astral.sun import sun, SunDirection, golden_hour
+# from astral.geocoder import database, lookup
 import os
 from crontab import CronTab
-from vilib import Vilib
+
 from PIL import Image
 import numpy as np
-city = lookup("Chicago", database())
-s = sun(city.observer, date=datetime.date(2025, 5, 8))
-golden = golden_hour(city.observer, direction = SunDirection.SETTING, date = datetime.date(2025, 5, 8))
-print((
-    f'Dawn:    {s["dawn"]}\n'
-    f'Sunrise: {s["sunrise"]}\n'
-    f'Noon:    {s["noon"]}\n'
-    f'Sunset:  {s["sunset"]}\n'
-    f'Dusk:    {s["dusk"]}\n'
-    f'Golden Hour: {golden}\n'
-    f'Golden Hour Start: {golden[0]}\n'
-    f'Golden Hour End: {golden[1]}\n'
-))
-print(golden_hour(city.observer, direction = SunDirection.SETTING, date = datetime.date(2025, 5, 8)))
+from vilib import Vilib
+# city = lookup("Chicago", database())
+# s = sun(city.observer, date=datetime.date(2025, 5, 8))
+# golden = golden_hour(city.observer, direction = SunDirection.SETTING, date = datetime.date(2025, 5, 8))
+# print((
+#     f'Dawn:    {s["dawn"]}\n'
+#     f'Sunrise: {s["sunrise"]}\n'
+#     f'Noon:    {s["noon"]}\n'
+#     f'Sunset:  {s["sunset"]}\n'
+#     f'Dusk:    {s["dusk"]}\n'
+#     f'Golden Hour: {golden}\n'
+#     f'Golden Hour Start: {golden[0]}\n'
+#     f'Golden Hour End: {golden[1]}\n'
+# ))
+# print(golden_hour(city.observer, direction = SunDirection.SETTING, date = datetime.date(2025, 5, 8)))
 def schedule_monitor_sunset(start_time, end_time):
     cron = CronTab(user=True)
     job = cron.new(command=f'python3 /Users/renwah/sunsetspotter/monitor_sunset.py')
@@ -43,12 +44,13 @@ def schedule_monitor_sunset(start_time, end_time):
     cron.write()
 
 # Calculate golden hour for the day after today
-city = lookup("Chicago", database())
-tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-golden_tomorrow = golden_hour(city.observer, direction=SunDirection.SETTING, date=tomorrow)
+# city = lookup("Chicago", database())
+# tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+# golden_tomorrow = golden_hour(city.observer, direction=SunDirection.SETTING, date=tomorrow)
 
 # Schedule the monitor_sunset script
-schedule_monitor_sunset(golden_tomorrow[0], golden_tomorrow[1])
+#schedule_monitor_sunset(golden_tomorrow[0], golden_tomorrow[1])
+schedule_monitor_sunset(datetime.time(19, 50), datetime.time(20, 50))  # Example times
 
 def monitor_sunset():
     # Initialize the camera
