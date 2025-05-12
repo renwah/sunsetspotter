@@ -6,7 +6,19 @@ Sunset spotting:
 - Find the sunset time every day + turn on the camera
 - When the photo is sufficiently colored/colorful, take a photo
 
-On Electron app:
-- When a photo or notification is received, send a message to the listhost with telling them that there is a good sunset. 
+On RPI:
+- run catch_sunset.py   
+- schedule with crontab
+- is there a nicer way to schedule? can u schedule stuff on crontab?
+
+On RoR app:
+- receive photos some way (API? RabbitMQ?)
+- Show uploaded photos
+- Send email message
+
+Controllers:
+- sunsets
+- emails
+- messages
 
 
