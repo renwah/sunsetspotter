@@ -13,11 +13,12 @@ import requests
 # from astral.sun import sun, SunDirection, golden_hour
 # from astral.geocoder import database, lookup
 import os
-from crontab import CronTab
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 from PIL import Image
 import numpy as np
-#from vilib import Vilib
+from vilib import Vilib
 # city = lookup("Chicago", database())
 # s = sun(city.observer, date=datetime.date(2025, 5, 8))
 # golden = golden_hour(city.observer, direction = SunDirection.SETTING, date = datetime.date(2025, 5, 8))
@@ -54,43 +55,56 @@ import numpy as np
 # schedule_monitor_sunset(datetime.time(19, 50), datetime.time(20, 50))  # Example times
 
 def monitor_sunset():
-    photo_path = "/Users/renwah/sunsetspotter/photos/test_sunset.png"
-    timestamp = "2025-05-12T19:50:00Z"  # ISO 8601 format
-    rails_url = "http://localhost:3001/sunsets"
 
-    send_to_rails_app(photo_path, timestamp, rails_url)
+
     # Initialize the camera
     Vilib.camera_start()
     Vilib.display(local=True, web=True)
     Vilib.color_detect(color="red")  # red, green, blue, yellow , orange, purple
-
+    path = "./sunsetspotter/photos"
 
     try:
         while True:
             n = Vilib.color_obj_parameter['n']
+            w = Vilib.color_obj_parameter['w']
+            h = Vilib.color_obj_parameter['h']
             color = Vilib.color_obj_parameter['color']
             if n != 0:
-                x = Vilib.color_obj_parameter['x']
-                y = Vilib.color_obj_parameter['y']
-                w = Vilib.color_obj_parameter['w']
-                h = Vilib.color_obj_parameter['h']
-                print(f"{n} {color} blocks found, the largest block coordinate=({x}, {y}), size={w}*{h}")
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                image.save(f"/Users/renwah/sunsetspotter/photos/sunset_{timestamp}.jpg")
+                image = Vilib.take_photo(timestamp,path)
                 print(f"Photo taken at {timestamp}")
+                photo_file = f"{photo_path}/{timestamp}.jpg"
+                email_sunset(photo_file, timestamp)
                 break
-            else:
-                print(f'No {color} block found')
 
     finally:
         # Stop the camera
         #schedule for the following day
-        tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-        schedule_monitor_sunset(tomorrow.time(20, 50), tomorrow.time(21, 50))
+        #tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+        #schedule_monitor_sunset(tomorrow.time(20, 50), tomorrow.time(21, 50))
         Vilib.camera_close()
+
+def email_sunset(photo_path, timestamp):
+    message = Mail(
+    from_email='rwah@uic.edu',
+    to_emails='renwah41@gmail.com',
+    subject='Look outside!',
+    html_content='<strong>A good sunset is happening!</strong>')
+    try:
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sg.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e.message)
 
 
 def send_to_rails_app(photo_path, timestamp, rails_url):
+    # ex: 
+    # photo_path = "/Users/renwah/sunsetspotter/photos/test_sunset.png"
+    # timestamp = "2025-05-12T19:50:00Z"  # ISO 8601 format
+    # rails_url = "http://localhost:3001/sunsets"
     with open(photo_path, 'rb') as photo:
         files = {'image': photo}  # Match the `image` parameter in the Rails controller
         response = requests.post(rails_url, files=files, data={})
