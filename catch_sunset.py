@@ -10,53 +10,31 @@
 import subprocess
 import datetime
 import requests
-# from astral.sun import sun, SunDirection, golden_hour
-# from astral.geocoder import database, lookup
+from astral.sun import sun, SunDirection, golden_hour
+from astral.geocoder import database, lookup
 import os
-# from sendgrid import SendGridAPIClient
-# from sendgrid.helpers.mail import Mail
 
 from PIL import Image
 import numpy as np
 from vilib import Vilib
-# city = lookup("Chicago", database())
-# s = sun(city.observer, date=datetime.date(2025, 5, 8))
-# golden = golden_hour(city.observer, direction = SunDirection.SETTING, date = datetime.date(2025, 5, 8))
-# print((
-#     f'Dawn:    {s["dawn"]}\n'
-#     f'Sunrise: {s["sunrise"]}\n'
-#     f'Noon:    {s["noon"]}\n'
-#     f'Sunset:  {s["sunset"]}\n'
-#     f'Dusk:    {s["dusk"]}\n'
-#     f'Golden Hour: {golden}\n'
-#     f'Golden Hour Start: {golden[0]}\n'
-#     f'Golden Hour End: {golden[1]}\n'
-# ))
-# print(golden_hour(city.observer, direction = SunDirection.SETTING, date = datetime.date(2025, 5, 8)))
-# def schedule_monitor_sunset(start_time, end_time):
-#     cron = CronTab(user=True)
-#     job = cron.new(command=f'python3 /Users/renwah/sunsetspotter/monitor_sunset.py')
-#     job.setall(f'{start_time.minute} {start_time.hour} * * *')
-#     job.set_comment('Monitor Sunset Start')
-#     cron.write()
 
-#     job_end = cron.new(command=f'pkill -f monitor_sunset.py')
-#     job_end.setall(f'{end_time.minute} {end_time.hour} * * *')
-#     job_end.set_comment('Monitor Sunset End')
-#     cron.write()
+def schedule_monitor_sunset():
+    city = lookup("Chicago", database())
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    golden_tomorrow = golden_hour(city.observer, direction=SunDirection.SETTING, date=tomorrow)
+    cron = CronTab(user=True)
+    job = cron.new(command=f'sudo python3 /Users/renwah/sunsetspotter/monitor_sunset.py')
+    job.setall(f'{golden_tomorrow[0].minute} {golden_tomorrow[0].hour} * * *')
+    job.set_comment('Monitor Sunset Start')
+    cron.write()
 
-# Calculate golden hour for the day after today
-# city = lookup("Chicago", database())
-# tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-# golden_tomorrow = golden_hour(city.observer, direction=SunDirection.SETTING, date=tomorrow)
+    job_end = cron.new(command=f'pkill -f monitor_sunset.py')
+    job_end.setall(f'{golden_tomorrow[1].minute} {golden_tomorrow[0].hour} * * *')
+    job_end.set_comment('Monitor Sunset End')
+    cron.write()
 
-# Schedule the monitor_sunset script
-#schedule_monitor_sunset(golden_tomorrow[0], golden_tomorrow[1])
-# schedule_monitor_sunset(datetime.time(19, 50), datetime.time(20, 50))  # Example times
 
 def monitor_sunset():
-
-
     # Initialize the camera
     Vilib.camera_start()
     Vilib.display(local=True, web=True)
@@ -87,7 +65,7 @@ def monitor_sunset():
         # Stop the camera
         #schedule for the following day
         #tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-        #schedule_monitor_sunset(tomorrow.time(20, 50), tomorrow.time(21, 50))
+        schedule_monitor_sunset(tomorrow.time(20, 50), tomorrow.time(21, 50))
         Vilib.camera_close()
 
 # def email_sunset(photo_path, timestamp):
