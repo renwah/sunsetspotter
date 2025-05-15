@@ -9,16 +9,10 @@ Sunset spotting:
 On RPI:
 - run catch_sunset.py   
 - schedule with crontab
-- is there a nicer way to schedule? can u schedule stuff on crontab?
+- send emails with Sendgrid
 
 On RoR app:
-- receive photos some way (API? RabbitMQ?)
+- receive photos
 - Show uploaded photos
-- Send email message
-
-Controllers:
-- sunsets
-- emails
-- messages
 
 
