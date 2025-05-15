@@ -7,7 +7,7 @@
 # send that picture somewhere (how to host?)
 # OR, if the sunset is no good, take a photo before you turn off the camera? (do this if u get shitty weather)
 # that app will notify someone else
-
+import subprocess
 import datetime
 import requests
 # from astral.sun import sun, SunDirection, golden_hour
@@ -61,7 +61,7 @@ def monitor_sunset():
     Vilib.camera_start()
     Vilib.display(local=True, web=True)
     Vilib.color_detect(color="red")  # red, green, blue, yellow , orange, purple
-    path = "./sunsetspotter/photos"
+    path = "./photos"
 
     try:
         while True:
@@ -69,13 +69,19 @@ def monitor_sunset():
             w = Vilib.color_obj_parameter['w']
             h = Vilib.color_obj_parameter['h']
             color = Vilib.color_obj_parameter['color']
-            if n != 0:
-                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            if n != 0 and w > 320 and h > 100:
+                timestamp = datetime.datetime.now().strftime("%Y%m%d")
                 image = Vilib.take_photo(timestamp,path)
                 print(f"Photo taken at {timestamp}")
                 photo_file = f"{path}/{timestamp}.jpg"
-                # email_sunset(photo_file, timestamp)
+                                # Run the email_sunset.py script
+                try:
+                    subprocess.run(["python3", "email_sunset.py"], check=True)
+                    print("email_sunset.py executed successfully.")
+                except subprocess.CalledProcessError as e:
+                    print(f"Error while running email_sunset.py: {e}")
                 break
+    
 
     finally:
         # Stop the camera
