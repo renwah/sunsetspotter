@@ -73,7 +73,7 @@ def monitor_sunset():
                 timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
                 image = Vilib.take_photo(timestamp,path)
                 print(f"Photo taken at {timestamp}")
-                photo_file = f"{photo_path}/{timestamp}.jpg"
+                photo_file = f"{path}/{timestamp}.jpg"
                 # email_sunset(photo_file, timestamp)
                 break
 
